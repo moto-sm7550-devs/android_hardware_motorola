@@ -29,10 +29,12 @@ import android.provider.Settings;
 
 import androidx.preference.PreferenceManager;
 
+import org.lineageos.settings.device.actions.CameraActivationAction;
 import org.lineageos.settings.device.actions.TorchAction;
 import org.lineageos.settings.device.actions.UpdatedStateNotifier;
 
 public class MotoActionsSettings {
+    private static final String GESTURE_CAMERA_ACTION_KEY = "gesture_camera_action";
     private static final String GESTURE_CHOP_CHOP_KEY = "gesture_chop_chop";
     private static final String GESTURE_IR_SILENCER_KEY = "gesture_ir_silencer";
     private static final String GESTURE_FLIP_TO_MUTE_KEY = "gesture_flip_to_mute";
@@ -53,6 +55,7 @@ public class MotoActionsSettings {
     private final Context mContext;
     private final UpdatedStateNotifier mUpdatedStateNotifier;
 
+    private boolean mCameraGestureEnabled;
     private boolean mChopChopEnabled;
     private boolean mPickUpGestureEnabled;
     private boolean mPocketGestureEnabled;
@@ -67,6 +70,10 @@ public class MotoActionsSettings {
         sharedPrefs.registerOnSharedPreferenceChangeListener(mPrefListener);
         mContext = context;
         mUpdatedStateNotifier = updatedStateNotifier;
+    }
+
+    public boolean isCameraGestureEnabled() {
+        return mCameraGestureEnabled;
     }
 
     public boolean isChopChopGestureEnabled() {
@@ -129,6 +136,10 @@ public class MotoActionsSettings {
         return mLiftToSilenceEnabled;
     }
 
+    public void cameraAction() {
+        new CameraActivationAction(mContext).action();
+    }
+
     public void chopChopAction() {
         new TorchAction(mContext).action();
     }
@@ -146,6 +157,7 @@ public class MotoActionsSettings {
     }
 
     private void loadPreferences(SharedPreferences sharedPreferences) {
+        mCameraGestureEnabled = sharedPreferences.getBoolean(GESTURE_CAMERA_ACTION_KEY, true);
         mChopChopEnabled = sharedPreferences.getBoolean(GESTURE_CHOP_CHOP_KEY, true);
         mIrWakeUpEnabled = sharedPreferences.getBoolean(GESTURE_IR_WAKEUP_KEY, true);
         mPickUpGestureEnabled = sharedPreferences.getBoolean(GESTURE_PICK_UP_KEY, true);
@@ -161,7 +173,9 @@ public class MotoActionsSettings {
                 public void onSharedPreferenceChanged(SharedPreferences sharedPrefs, String key) {
                     boolean updated = true;
 
-                    if (GESTURE_CHOP_CHOP_KEY.equals(key)) {
+                    if (GESTURE_CAMERA_ACTION_KEY.equals(key)) {
+                        mCameraGestureEnabled = sharedPrefs.getBoolean(GESTURE_CAMERA_ACTION_KEY, true);
+                    } else if (GESTURE_CHOP_CHOP_KEY.equals(key)) {
                         mChopChopEnabled = sharedPrefs.getBoolean(GESTURE_CHOP_CHOP_KEY, true);
                     } else if (GESTURE_IR_WAKEUP_KEY.equals(key)) {
                         mIrWakeUpEnabled = sharedPrefs.getBoolean(GESTURE_IR_WAKEUP_KEY, true);
